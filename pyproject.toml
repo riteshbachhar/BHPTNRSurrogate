@@ -61,8 +61,7 @@ docs = [
     "sphinx-rtd-theme>=1.0",
 ]
 full = [
-    "gwsurrogate",
-    "gwtools",
+    "gwsurrogate"
 ]
 
 [project.urls]
