@@ -8,11 +8,11 @@ import numpy as np
 import os
 from os import path
 
-import model_utils.load_surrogates as load
-import model_utils.eval_surrogates as eval_sur
-from common_utils import utils, fits
-import common_utils.nr_calibration as nrcalib
-import common_utils.doc_string as docs
+from .model_utils import load_surrogates as load
+from .model_utils import eval_surrogates as eval_sur
+from .common_utils import utils, fits
+from .common_utils import nr_calibration as nrcalib
+from .common_utils import doc_string as docs
 
 # h5 data directory
 h5_data_dir = os.path.dirname(os.path.abspath(__file__)) + '/../data'
