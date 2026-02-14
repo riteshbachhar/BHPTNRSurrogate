@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bhptnrsurrogate"
+version = "1.0.0"
+description = "Surrogate gravitational waveform models for point-particle Black Hole Perturbation Theory waveform"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Ritesh Bachhar", email = "riteshbachhar@gmail.com"},
+    {name = "Scott Field"},
+    {name = "Tousif Islam"},
+    {name = "Gaurav Khanna"},
+    {name = "Nur Rifat"},
+    {name = "Katie Rink"},
+    {name = "Vijay Varma"},
+]
+maintainers = [
+    {name = "Ritesh Bachhar", email = "riteshbachhar@gmail.com"},
+]
+keywords = [
+    "gravitational-waves",
+    "surrogate-model",
+    "black-holes",
+    "numerical-relativity",
+    "LIGO",
+    "LISA",
+    "waveform-modeling",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.20",
+    "scipy>=1.7",
+    "scikit-learn>=1.0",
+    "h5py>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+docs = [
+    "sphinx>=5.0",
+    "sphinx-rtd-theme>=1.0",
+]
+full = [
+    "gwsurrogate",
+    "gwtools",
+]
+
+[project.urls]
+Homepage = "https://bhptoolkit.org/BHPTNRSurrogate/"
+Documentation = "https://bhptoolkit.org/BHPTNRSurrogate/"
+Repository = "https://github.com/riteshbachhar/BHPTNRSurrogate"
+Issues = "https://github.com/riteshbachhar/BHPTNRSurrogate/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["bhptnrsurrogate*"]
+
+[tool.setuptools.package-data]
+bhptnrsurrogate = ["*.h5"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["bhptnrsurrogate"]
+omit = ["tests/*", "tutorials/*"]
