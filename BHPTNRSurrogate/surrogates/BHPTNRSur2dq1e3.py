@@ -13,6 +13,7 @@ from .._data import get_data_dir
 from .model_utils import load_surrogates as load
 from .model_utils import eval_surrogates as eval_sur
 from .common_utils import utils, fits
+from .common_utils import eval_GPRs
 from .common_utils import nr_calibration as nrcalib
 from .common_utils import doc_string as docs
 
@@ -25,6 +26,7 @@ _surrogate_data = {}
 _SURROGATE_KEYS = (
     'times_dict', 'fit_data_dict_1_sign', 'fit_data_dict_2_sign',
     'B_dict_1_sign', 'B_dict_2_sign', 'alpha_coeffs', 'beta_coeffs',
+    'gpr_fits_1_sign', 'gpr_fits_2_sign',
 )
 
 def _ensure_loaded():
@@ -39,6 +41,13 @@ def _ensure_loaded():
         _surrogate_data['B_dict_2_sign'] = B_dict_2_sign
         _surrogate_data['alpha_coeffs'] = alpha_coeffs
         _surrogate_data['beta_coeffs'] = beta_coeffs
+
+        # stack the GPR fits over EIM nodes once, here, rather than on every call;
+        # the raw fit data above is kept as well, for cross-checking against sklearn
+        _surrogate_data['gpr_fits_1_sign'] = {sign: eval_GPRs.build_stacked_fits(fit_data_dict)
+                                              for sign, fit_data_dict in fit_data_dict_1_sign.items()}
+        _surrogate_data['gpr_fits_2_sign'] = {sign: eval_GPRs.build_stacked_fits(fit_data_dict)
+                                              for sign, fit_data_dict in fit_data_dict_2_sign.items()}
 
 def __getattr__(name):
     """Lazy access to surrogate data attributes at the module level."""
@@ -92,14 +101,14 @@ def generate_surrogate(q, spin1=0.0, spin2=None, ecc=None, ano=None, modes=None,
     # choose appropriate fit params here depending on the input spin value
     if spin1 < 0.0:
         times = _surrogate_data['times_dict']['negative_spin']
-        fit_data_dict_1 = _surrogate_data['fit_data_dict_1_sign']['negative_spin']
-        fit_data_dict_2 = _surrogate_data['fit_data_dict_2_sign']['negative_spin']
+        fit_data_dict_1 = _surrogate_data['gpr_fits_1_sign']['negative_spin']
+        fit_data_dict_2 = _surrogate_data['gpr_fits_2_sign']['negative_spin']
         B_dict_1 = _surrogate_data['B_dict_1_sign']['negative_spin']
         B_dict_2 = _surrogate_data['B_dict_2_sign']['negative_spin']
     else:
         times = _surrogate_data['times_dict']['positive_spin']
-        fit_data_dict_1 = _surrogate_data['fit_data_dict_1_sign']['positive_spin']
-        fit_data_dict_2 = _surrogate_data['fit_data_dict_2_sign']['positive_spin']
+        fit_data_dict_1 = _surrogate_data['gpr_fits_1_sign']['positive_spin']
+        fit_data_dict_2 = _surrogate_data['gpr_fits_2_sign']['positive_spin']
         B_dict_1 = _surrogate_data['B_dict_1_sign']['positive_spin']
         B_dict_2 = _surrogate_data['B_dict_2_sign']['positive_spin']
 

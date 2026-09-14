@@ -9,31 +9,82 @@ import numpy as np
 import scipy
 from scipy.interpolate import splrep, splev
 from . import utils
-try:
-    from .eval_pysur import evaluate_fit as evaluate_GPR
-except ImportError:
-    evaluate_GPR = None
+from . import eval_GPRs
 
 #----------------------------------------------------------------------------------------------------
 def _evaluate_GPR_at_EIM_nodes(X, fit_data):
-    """ Evaluate the GPR at one EIM node
-        For information on the inputs, please look at all_modes_surrogate()
+    """ Evaluate the GPR at every EIM node of a datapiece in one broadcast
+        The closed form, and how it relates to sklearn's predict, is in eval_GPRs.py
+
+        fit_data is the stacked fit from eval_GPRs.build_stacked_fit, built once when
+        the h5 file is loaded -- not the raw [h_eim_gpr_mode, eim_indicies] pair.
+        For information on the other inputs, please look at all_modes_surrogate()
     """
-    if evaluate_GPR is None:
-        raise ImportError(
-            "The eval_pysur submodule is required for GPR-based surrogate models "
-            "(e.g. BHPTNRSur2dq1e3). Initialize it with:\n"
-            "  cd BHPTNRSurrogate && git submodule init && git submodule update"
-        )
-
-    [h_eim_gpr_mode, eim_indicies] = fit_data
-    [q_log10, chi] = X
-
-    # Evaluate GPR fit using pySurrogate at each node
-    fit = [evaluate_GPR.getFitEvaluator(dict(h_eim_gpr_mode['node%s'%i]))([q_log10, chi]) for i in range(len(eim_indicies))]
 
     # Return result for given (log(q),chi)
-    return np.array(fit)
+    return eval_GPRs.evaluate_stacked(X, fit_data)
+
+
+#----------------------------------------------------------------------------------------------------
+# Reference implementation -- kept commented out, for cross-checking eval_GPRs.py
+#
+# This is how _evaluate_GPR_at_EIM_nodes used to work: it rebuilt a sklearn
+# GaussianProcessRegressor at every EIM node, on every call, and called predict.
+# eval_GPRs.py replaces that with a closed form of the same prediction, so the
+# model itself no longer needs any of the dependencies below.
+#
+# To use the reference, both of these are needed:
+#
+#   1. the eval_pysur git submodule (surrogates/common_utils/eval_pysur), which
+#      reconstructs the sklearn objects from the fit data stored in the h5 file:
+#
+#          cd BHPTNRSurrogate && git submodule init && git submodule update
+#
+#      (source: https://bitbucket.org/vijayvarma392/eval_pysur.git)
+#
+#   2. scikit-learn, which eval_pysur uses to evaluate the fits:
+#
+#          pip install ".[gpr]"
+#
+# The two implementations agree to ~1e-9 relative at every EIM node (worst case
+# measured over all 32 datapiece blocks: 5.6e-10, 22-mode phase at q=3, chi=0).
+# They are NOT bit-identical: the algebra is the same but the floating-point
+# operations differ, and both are limited by heavy cancellation in the K . alpha_
+# contraction stored in the fit data. Compare with rtol=1e-8; anything larger
+# means the closed form in eval_GPRs.py has stopped matching the stored fits.
+#
+# The two take different fit data. BHPTNRSur2dq1e3 caches both: the raw h5 fit
+# data that the reference needs, and the stacked arrays built from it at load time.
+# To cross-check, uncomment the import and function below, then e.g.
+#
+#     from BHPTNRSurrogate.surrogates import BHPTNRSur2dq1e3 as bhptsur
+#     bhptsur._ensure_loaded()
+#     X       = [np.log10(q), chi]
+#     raw     = bhptsur._surrogate_data['fit_data_dict_1_sign']['positive_spin'][(2,2)]
+#     stacked = bhptsur._surrogate_data['gpr_fits_1_sign']['positive_spin'][(2,2)]
+#     np.testing.assert_allclose(_evaluate_GPR_at_EIM_nodes(X, stacked),
+#                                _evaluate_GPR_at_EIM_nodes_reference(X, raw),
+#                                rtol=1e-8)
+#
+# ('fit_data_dict_2_sign' / 'gpr_fits_2_sign' for the second datapiece, and
+# 'negative_spin' for the negative-spin sub-surrogate.)
+#
+# from .eval_pysur import evaluate_fit as evaluate_GPR
+#
+# def _evaluate_GPR_at_EIM_nodes_reference(X, fit_data):
+#     """ Evaluate the GPR at one EIM node
+#         For information on the inputs, please look at all_modes_surrogate()
+#     """
+#
+#     [h_eim_gpr_mode, eim_indicies] = fit_data
+#     [q_log10, chi] = X
+#
+#     # Evaluate GPR fit using pySurrogate at each node
+#     fit = [evaluate_GPR.getFitEvaluator(dict(h_eim_gpr_mode['node%s'%i]))([q_log10, chi]) for i in range(len(eim_indicies))]
+#
+#     # Return result for given (log(q),chi)
+#     return np.array(fit)
+
 
 #----------------------------------------------------------------------------------------------------
 def _evaluate_splines_at_EIM_nodes(X, fit_data):

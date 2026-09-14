@@ -26,6 +26,8 @@ def _mock_loading():
              'B_dict_1_sign': {'positive_spin': None, 'negative_spin': None},
              'B_dict_2_sign': {'positive_spin': None, 'negative_spin': None},
              'alpha_coeffs': None, 'beta_coeffs': None,
+             'gpr_fits_1_sign': {'positive_spin': None, 'negative_spin': None},
+             'gpr_fits_2_sign': {'positive_spin': None, 'negative_spin': None},
          }), \
          patch(f"{MODULE}.eval_sur.evaluate_surrogate", return_value=_make_dummy_result()):
         yield
