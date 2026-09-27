@@ -77,9 +77,14 @@ def extract_h5filegprsettings_to_emptydict(h_gpr, h_file, nnodes):
                                h_gpr['node%s'%eim_indx]['lin_reg_params'], 
                                ['coef_', 'intercept_'])
 
+        # L_ is the Cholesky factor of the training matrix, needed only for GPR error
+        # bars, which this package never computes. A data file may omit it.
+        gpr_keys = ['X_train_', 'alpha_', '_y_train_mean']
+        if 'L_' in h_file['node%s'%eim_indx]['GPR_params']:
+            gpr_keys.append('L_')
         mk_deepcopy_dictionary(h_file['node%s'%eim_indx]['GPR_params'], 
                                h_gpr['node%s'%eim_indx]['GPR_params'], 
-                               ['X_train_', 'alpha_', '_y_train_mean', 'L_'])
+                               gpr_keys)
 
         mk_deepcopy_dictionary(h_file['node%s'%eim_indx]['GPR_params']['kernel_'], 
                                h_gpr['node%s'%eim_indx]['GPR_params']['kernel_'], 
