@@ -19,8 +19,6 @@ repository:
 ```bash
 git clone https://github.com/BlackHolePerturbationToolkit/BHPTNRSurrogate.git
 cd BHPTNRSurrogate
-git submodule init
-git submodule update
 ```
 
 ## Available Models
@@ -73,8 +71,10 @@ geometric waveforms; calibrated and physical waveforms require `mass_scale='M'`.
 
 # Requirements
 
-This package requires Python 3.8 or newer. Runtime dependencies, including
-scikit-learn for the two-dimensional model, are installed automatically.
+This package requires Python 3.8 or newer. Runtime dependencies (numpy, scipy,
+h5py, gwtools) are installed automatically. There are no git submodules to
+initialise, and scikit-learn is no longer needed: the two-dimensional model
+evaluates its Gaussian-process fits in closed form.
 
 Parts of the accompanying Jupyter notebook will require gwsurrogate, 
 which can be installed with either pip
@@ -98,8 +98,8 @@ run most parts of the notebook.
 2. Download the datafiles from Zenodo
 
 ```bash
-wget https://zenodo.org/records/13340319/BHPTNRSur1dq1e4.h5
-wget https://zenodo.org/records/13340319/BHPTNRSur2dq1e3.h5
+wget https://zenodo.org/records/13340319/files/BHPTNRSur1dq1e4.h5
+wget https://zenodo.org/records/13340319/files/BHPTNRSur2dq1e3.h5
 ```
 
 3. Create `BHPTNRSurrogate/data/` and move the files into it.

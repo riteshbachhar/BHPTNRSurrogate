@@ -1,5 +1,35 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- `BHPTNRSur2dq1e3` evaluates its Gaussian-process fits in closed form, vectorized
+  over the EIM nodes, instead of rebuilding a scikit-learn `GaussianProcessRegressor`
+  at every node on every call. 5x faster: 261 ms to 51 ms per 8-mode waveform. Output
+  agrees with the previous path to ~1e-9 per node, ~1e-7 in strain; the two are not
+  bit-identical, which is at the level where results already differ between CPUs.
+- scikit-learn is no longer a required dependency, reversing the change made in 0.2.0.
+  It is now the optional `reference` extra, needed only for the commented-out
+  cross-check in `common_utils/fits.py`.
+- The `eval_pysur` git submodule is no longer needed. Cloning the repository requires
+  no `git submodule` step.
+- `GPR_params/L_` is now optional when reading the 2D data file. It is the Cholesky
+  factor used only for GPR error bars, which this package never computes, so a data
+  file may omit it.
+
+### Fixed
+- The Zenodo `wget` URLs in the README were missing `/files/` and returned 404.
+
+### Notes
+- The 2D data file can be repacked from 821 MB to 192 MB with no meaningful change to
+  any waveform: worst relative L2 difference 2.2e-13 over 10000 random points in the
+  parameter space, against a ~1e-7 floor set by CPU-dependent summation order. The
+  saving comes from dropping `L_` (251 MB), zeroing each basis row on the side of
+  merger where it holds only roundoff (249 MB), and gzip+shuffle (132 MB).
+- **The md5 check on the 2D data file is currently disabled** (`load_surrogates.py`,
+  marked TEMPORARY) because the repacked file's hash does not match the published one.
+  This must be restored, with the correct hash, before release.
+
 ## [0.2.0] - 2026-09-14
 
 ### Added

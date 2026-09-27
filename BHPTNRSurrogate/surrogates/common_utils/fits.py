@@ -33,18 +33,22 @@ def _evaluate_GPR_at_EIM_nodes(X, fit_data):
 # eval_GPRs.py replaces that with a closed form of the same prediction, so the
 # model itself no longer needs any of the dependencies below.
 #
-# To use the reference, both of these are needed:
+# The reference is NOT part of the package and nothing ships it. To run it you have
+# to fetch two things yourself:
 #
-#   1. the eval_pysur git submodule (surrogates/common_utils/eval_pysur), which
-#      reconstructs the sklearn objects from the fit data stored in the h5 file:
+#   1. eval_pysur, which reconstructs the sklearn objects from the fit data in the
+#      h5 file. It used to be a git submodule here; it no longer is.
 #
-#          cd BHPTNRSurrogate && git submodule init && git submodule update
+#          git clone https://bitbucket.org/vijayvarma392/eval_pysur.git
 #
-#      (source: https://bitbucket.org/vijayvarma392/eval_pysur.git)
+#      then put it on sys.path and import evaluate_fit from it.
 #
 #   2. scikit-learn, which eval_pysur uses to evaluate the fits:
 #
-#          pip install ".[gpr]"
+#          pip install ".[reference]"
+#
+#   3. the full (uncompressed) data file. The compressed one drops GPR_params/L_,
+#      which sklearn needs to reconstruct a GaussianProcessRegressor.
 #
 # The two implementations agree to ~1e-9 relative at every EIM node (worst case
 # measured over all 32 datapiece blocks: 5.6e-10, 22-mode phase at q=3, chi=0).
@@ -69,7 +73,7 @@ def _evaluate_GPR_at_EIM_nodes(X, fit_data):
 # ('fit_data_dict_2_sign' / 'gpr_fits_2_sign' for the second datapiece, and
 # 'negative_spin' for the negative-spin sub-surrogate.)
 #
-# from .eval_pysur import evaluate_fit as evaluate_GPR
+# from eval_pysur import evaluate_fit as evaluate_GPR   # cloned separately, see above
 #
 # def _evaluate_GPR_at_EIM_nodes_reference(X, fit_data):
 #     """ Evaluate the GPR at one EIM node

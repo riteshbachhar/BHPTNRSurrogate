@@ -12,11 +12,12 @@ dependencies = [
     "scipy",
     "h5py",
     "gwtools",
-    "scikit-learn",
 ]
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
+# only needed to run the commented-out sklearn cross-check in common_utils/fits.py
+reference = ["scikit-learn"]
 
 [tool.setuptools.packages]
 find = {where = ["."], include = ["BHPTNRSurrogate*"]}

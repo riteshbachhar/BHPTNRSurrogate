@@ -44,11 +44,7 @@ def model_1d():
 
 @pytest.fixture(scope="module")
 def model_2d():
-    """Load the 2D surrogate model (triggers h5 download).
-
-    Requires the eval_pysur submodule used for GPR fits.
-    """
-    from BHPTNRSurrogate.surrogates.common_utils.eval_pysur import evaluate_fit  # noqa: F401
+    """Load the 2D surrogate model (triggers h5 download)."""
     from BHPTNRSurrogate.surrogates import BHPTNRSur2dq1e3
     BHPTNRSur2dq1e3._ensure_loaded()
     return BHPTNRSur2dq1e3
